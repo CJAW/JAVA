@@ -1,0 +1,17 @@
+package com.user.jsoup;
+
+import java.awt.List;
+
+public class Test {
+	
+	
+    public static java.util.List<String> list;
+    
+	public static void main(String[] args){
+		HtmlUtils htmlUtils = new HtmlUtils();
+		list.add( htmlUtils.list.get(1).leftList.get(1));
+		System.out.println(list.get(0));
+		
+	}
+
+}

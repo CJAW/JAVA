@@ -1,0 +1,59 @@
+package com.user.jsoup;
+
+import java.io.IOException;
+import java.util.Calendar;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
+
+import com.squareup.okhttp.FormEncodingBuilder;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
+
+public class Login {
+
+	public static void main(String[] args){
+		
+		  Document document;
+		try {
+			document = Jsoup.connect("http://class.sise.com.cn:7001/sise/").get();
+			
+			 Elements name = document.select("input");
+	          String hidden_name = name.get(0).attr("name");
+	          String hidden_value = name.get(0).attr("value");
+
+
+	          OkHttpClient con = new OkHttpClient();
+	          FormEncodingBuilder body = new FormEncodingBuilder();
+	          body.add("username","1440124131");
+	          body.add("password","sss");
+	          body.add(hidden_name, hidden_value);
+
+	          Request rq = new Request.Builder().url("http://class.sise.com.cn:7001/sise/login_check.jsp").post(body.build()).addHeader("User-Agent:", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.112 Safari/537.36").build();
+	          Response re = con.newCall(rq).execute();
+	          String cookie = re.header("Set-Cookie").toString().trim().split(";")[0].substring(0);
+
+//	          String erro = re.body().string().split("=")[2].split("，")[0];
+	          
+	          String erro = re.body().string().split("=")[1].split("'")[1].split("/")[1];
+
+
+	          System.out.println(erro);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		 Calendar cal = Calendar.getInstance();
+		 System.out.println(cal.get(Calendar.DAY_OF_WEEK)-1);
+		 int current = (int) (cal.get(Calendar.HOUR_OF_DAY));
+		 int currentmin = (int) (cal.get(Calendar.MINUTE));
+
+		 System.out.println(current);
+		 System.out.println(currentmin);
+		 int a = 1440/(10*60);
+		 System.out.println(a);
+	}
+}

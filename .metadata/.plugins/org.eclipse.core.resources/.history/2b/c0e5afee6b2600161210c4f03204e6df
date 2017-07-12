@@ -1,0 +1,437 @@
+package com.user.jsoup;
+
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.HtmlForm;
+import com.gargoylesoftware.htmlunit.html.HtmlHiddenInput;
+import com.gargoylesoftware.htmlunit.html.HtmlInput;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.html.HtmlPasswordInput;
+import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
+
+import net.sourceforge.htmlunit.corejs.javascript.ast.NewExpression;
+
+public class HtmlUtils {
+	
+	static String Cookie;
+	public static void main(String[] args) throws IOException, InterruptedException{
+		Login();
+		//getURL(Cookie);
+		//getMyMessage();
+       // getMyClass();
+		//getExam();
+		getAttendce();
+		//getViolation();
+		
+		//getPurize();
+		//getOpenClass();
+		System.out.println(list.get(1).leftList.get(1));
+	}
+	
+	//登陆
+	public static void Login() throws IOException{
+		
+		//模拟游览器
+				WebClient wc= new WebClient(BrowserVersion.CHROME);			
+				wc.setJavaScriptTimeout(5000);  
+			    wc.getOptions().setJavaScriptEnabled(true);   
+			    wc.getOptions().setCssEnabled(false); 
+			    wc.getCookieManager().setCookiesEnabled(true);
+			    wc.getOptions().setThrowExceptionOnScriptError(false);  
+			    wc.getOptions().setTimeout(100000); 
+			    wc.getOptions().setDoNotTrackEnabled(false); 
+			    
+			    HtmlPage page = null;
+				try {
+					page = wc.getPage("http://class.sise.com.cn:7001/sise/");
+					Thread.sleep(100);
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+				
+				//System.out.println(page.asXml());
+				
+				//获得隐藏域的值
+				Document document = Jsoup.parse(page.asXml());
+				Elements name = document.select("input");
+				String hidden_name = name.get(0).attr("name");
+				String hidden_value =name.get(0).attr("value") ;
+				Element value2 = document.getElementById("token");
+				String token = value2.attr("value").trim();
+				//System.out.println(token);
+				
+				//模拟表单登陆
+				HtmlForm htmlForm = page.getFormByName("form1");
+				HtmlInput button = htmlForm.getInputByName("Submit");
+				HtmlHiddenInput hiddenInput1 = htmlForm.getInputByName(hidden_name);
+				HtmlHiddenInput hiddenInput2 = htmlForm.getInputByName("random");
+				HtmlHiddenInput hiddenInput3 = htmlForm.getInputByName("token");
+				HtmlTextInput textInput = htmlForm.getInputByName("username");
+				HtmlPasswordInput passwordInput = htmlForm.getInputByName("password");
+				hiddenInput1.setValueAttribute(hidden_value);
+				hiddenInput2.setValueAttribute("1462023984234");
+				hiddenInput3.setValueAttribute(token);
+				textInput.setValueAttribute("1440124131");
+				passwordInput.setValueAttribute("cai847400153");
+				
+				HtmlPage page2= button.click();
+				
+				//System.out.println(page2.asXml());
+				//获取cookie
+				Cookie = page.getWebResponse().getResponseHeaderValue("Set-Cookie").toString().trim().split(";")[0].substring(0);
+				
+				//System.out.println(Cookie);
+//				System.out.println(page.getWebResponse().get);
+	}
+	
+	
+	//获取url
+	public static java.util.Map<Integer, String> getURL(String cookie){
+		
+		java.util.Map<Integer,String> map =new HashMap<Integer, String>();
+		OkHttpClient con = new OkHttpClient();
+		Request rq =new  Request.Builder().url("http://class.sise.com.cn:7001/sise/module/student_states/student_select_class/main.jsp").get().addHeader("Cookie", cookie).addHeader("User-Agent:", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.112 Safari/537.36").build();
+		try {
+			Response  re = con.newCall(rq).execute();
+			String body = re.body().string();
+			//System.out.println(body);
+			
+			Document doc = Jsoup.parse(body);
+			Elements table = doc.select("table").select("tbody").select("tr").select("td").select("tr").select("td").select("td");
+			
+			for(int i=2;i<table.size();i++){
+				String my_message_url = table.get(i).toString().split("'")[1];
+				map.put(i, my_message_url);
+			}
+			
+			System.out.println(map.get(23));
+		} catch (IOException e) {
+			
+			e.printStackTrace();
+		}
+		return map;
+	}
+	
+	
+	//获取个人信息
+	public static List<String> getMyMessage(){
+		
+		String url = getURL(Cookie).get(2).replace("../../../../../","http://class.sise.com.cn:7001/").replace("amp;", "&");
+		//String url = "http://class.sise.com.cn:7001" +getURL(Cookie).get(24);		
+
+		OkHttpClient con = new OkHttpClient();
+		
+		Request rq =new  Request.Builder().url(url).get().addHeader("Cookie", Cookie).addHeader("User-Agent:", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.112 Safari/537.36").addHeader("Host:","class.sise.com.cn:7001").build();
+
+		try {
+			Response re = con.newCall(rq).execute();
+			String message = re.body().string();
+			//System.out.println(message);
+			Document doc  = Jsoup.parse(message);
+			//Elements my_message = doc.select("table").select("tr").select("td").select("td").select("tr");
+			List<String> list = new ArrayList<String>();
+		    
+		   List<String> left = new ArrayList<String>();
+		   List<String> right = new ArrayList<String>();
+			
+			Elements elements = doc.getElementsByTag("table");
+			Elements element = elements.get(6).select("td");
+			
+			 for(int b=0;b<element.size();b++){
+
+                 String my_message1 = element.get(b).text();
+
+                System.out.println(my_message1+b);
+                    
+             }
+			
+			 
+		} catch (IOException e) {
+			
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	
+	
+	
+//	
+//////	
+//////	//获取班级信息
+		public static List<String> getMyClass(){
+			
+
+			List<String> list = new ArrayList<String>();
+			
+			String url ="http://class.sise.com.cn:7001"+ getURL(Cookie).get(3);
+					
+			
+			OkHttpClient con = new OkHttpClient();
+			
+			Request rq =new  Request.Builder().url(url).get().addHeader("Cookie", Cookie).addHeader("User-Agent:", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.112 Safari/537.36").addHeader("Host:","class.sise.com.cn:7001").build();
+
+			try {
+				Response re = con.newCall(rq).execute();
+				String message = re.body().string();
+				//System.out.println(message);
+				Document doc  = Jsoup.parse(message);
+				//Elements my_message = doc.select("table").select("tr").select("td").select("td").select("tr");
+							
+				
+				Elements elements = doc.getElementsByTag("table");
+				
+				for(int i=6;i<elements.size();i++){
+					
+					Elements element = elements.get(i).select("td");
+					
+					for(int b=8;b<element.size();b++){
+						
+						String mess = element.get(b).text().replace(" ", "  ").replaceAll("(\\([^\\)]+\\))", "").split("-")[0].replaceAll("\\d","");
+						
+						System.out.println(mess+b);
+					}
+			}
+				
+			} catch (IOException e) {
+				
+				e.printStackTrace();
+			}
+			return list;
+		}
+		
+		
+		//获取考试信息
+		public static List<String> getExam(){
+			
+			String url = getURL(Cookie).get(4).replace("../../../../../","http://class.sise.com.cn:7001/").replace("amp;", "&");
+			//String url = "http://class.sise.com.cn:7001" +getURL(Cookie).get(24);		
+
+			OkHttpClient con = new OkHttpClient();
+			
+			Request rq =new  Request.Builder().url(url).get().addHeader("Cookie", Cookie).addHeader("User-Agent:", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.112 Safari/537.36").addHeader("Host:","class.sise.com.cn:7001").build();
+
+			try {
+				Response re = con.newCall(rq).execute();
+				String message = re.body().string();
+				//System.out.println(message);
+				Document doc  = Jsoup.parse(message);
+				//Elements my_message = doc.select("table").select("tr").select("td").select("td").select("tr");
+				List<String> list = new ArrayList<String>();
+			
+				
+				Elements elements = doc.getElementsByTag("table");
+				
+				for(int i=4;i<elements.size();i++){
+					
+					Elements element = elements.get(i).select("td");
+					
+					for(int b=0;b<element.size();b++){
+						
+						String mess = element.get(b).text();
+						
+						System.out.println(mess);
+					}
+			}
+					
+			} catch (IOException e) {
+				
+				e.printStackTrace();
+			}
+			return null;
+		}
+	
+		public static List<Data> list;
+		//获取考勤信息
+		public static List<String> getAttendce(){
+			
+			String url = getURL(Cookie).get(5).replace("../../../../../","http://class.sise.com.cn:7001/").replace("amp;", "&");
+			//String url = "http://class.sise.com.cn:7001" +getURL(Cookie).get(24);		
+
+			OkHttpClient con = new OkHttpClient();
+			
+			Request rq =new  Request.Builder().url(url).get().addHeader("Cookie", Cookie).addHeader("User-Agent:", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.112 Safari/537.36").addHeader("Host:","class.sise.com.cn:7001").build();
+
+			try {
+				Response re = con.newCall(rq).execute();
+				String message = re.body().string();
+				//System.out.println(message);
+				Document doc  = Jsoup.parse(message);
+				//Elements my_message = doc.select("table").select("tr").select("td").select("td").select("tr");
+				 list = new ArrayList<Data>();
+			
+				Data data = new Data();
+				Elements elements = doc.getElementsByTag("table");
+				
+				for(int i=0;i<elements.size();i++){
+					
+					Elements element = elements.get(i).select("td");
+					
+					for(int b=3;b<element.size();b=b+3){
+						
+						data.leftList.add(element.get(b).text());	
+						data.centertList.add(element.get(b+1).text());	
+						data.rightList.add(element.get(b+2).text());	
+					
+						list.add(data);
+					}
+					
+			}
+				
+				
+				
+					
+			} catch (IOException e) {
+				
+				e.printStackTrace();
+			}
+			return null;
+		}
+	
+		
+		//获取违规信息
+		public static List<String> getViolation(){
+			
+			String url = getURL(Cookie).get(23).replace("../../../../../","http://class.sise.com.cn:7001/").replace("amp;", "&");
+			//String url = "http://class.sise.com.cn:7001" +getURL(Cookie).get(24);		
+
+			OkHttpClient con = new OkHttpClient();
+			
+			Request rq =new  Request.Builder().url(url).get().addHeader("Cookie", Cookie).addHeader("User-Agent:", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.112 Safari/537.36").addHeader("Host:","class.sise.com.cn:7001").build();
+
+			try {
+				Response re = con.newCall(rq).execute();
+				String message = re.body().string();
+				//System.out.println(message);
+				Document doc  = Jsoup.parse(message);
+				//Elements my_message = doc.select("table").select("tr").select("td").select("td").select("tr");
+				List<String> list = new ArrayList<String>();
+			
+				
+				Elements elements = doc.getElementsByTag("table");
+				
+				//for(int i=2;i<elements.size();i++){
+					
+					Elements element = elements.get(2).select("td");
+					
+					for(int b=0;b<element.size();b++){
+						
+						String mess = element.get(b).text();
+						
+						System.out.println(mess);
+					//}
+			}
+					
+			} catch (IOException e) {
+				
+				e.printStackTrace();
+			}
+			return null;
+		}
+	
+		
+		//获取奖罚信息
+		public static List<String> getPurize(){
+			
+			//String url = getURL(Cookie).get(2).replace("../../../../../","http://class.sise.com.cn:7001/").replace("amp;", "&");
+			String url = "http://class.sise.com.cn:7001" +getURL(Cookie).get(7);		
+
+			String my_url = url.replace("amp;", "&");
+			
+			OkHttpClient con = new OkHttpClient();
+			
+			Request rq =new  Request.Builder().url(my_url).get().addHeader("Cookie", Cookie).addHeader("User-Agent:", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.112 Safari/537.36").addHeader("Host:","class.sise.com.cn:7001").build();
+
+			try {
+				Response re = con.newCall(rq).execute();
+				String message = re.body().string();
+				//System.out.println(message);
+				Document doc  = Jsoup.parse(message);
+				//Elements my_message = doc.select("table").select("tr").select("td").select("td").select("tr");
+				List<String> list = new ArrayList<String>();
+			
+				
+				Elements elements = doc.getElementsByTag("table");
+				
+				
+					
+					Elements element = elements.get(4).select("td");
+					
+					for(int b=0;b<element.size();b++){
+						
+						String mess = element.get(b).text();
+						
+						System.out.println(mess+b);
+					
+			}
+					
+			} catch (IOException e) {
+				
+				e.printStackTrace();
+			}
+			return null;
+		}
+		
+		//获取个人信息
+		public static List<String> getOpenClass(){
+			
+			//String url = getURL(Cookie).get(2).replace("../../../../../","http://class.sise.com.cn:7001/").replace("amp;", "&");
+			String url = "http://class.sise.com.cn:7001" +getURL(Cookie).get(12);		
+
+			String my_url = url.replace("amp;", "&");
+			
+			OkHttpClient con = new OkHttpClient();
+			
+			Request rq =new  Request.Builder().url(my_url).get().addHeader("Cookie", Cookie).addHeader("User-Agent:", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.112 Safari/537.36").addHeader("Host:","class.sise.com.cn:7001").build();
+
+			try {
+				Response re = con.newCall(rq).execute();
+				String message = re.body().string();
+				//System.out.println(message);
+				Document doc  = Jsoup.parse(message);
+				//Elements my_message = doc.select("table").select("tr").select("td").select("td").select("tr");
+				List<String> list = new ArrayList<String>();
+			
+				
+				Elements elements = doc.getElementsByTag("table");
+				
+				for(int i=0;i<elements.size();i++){
+					
+					Elements element = elements.get(5).select("td");
+					
+					for(int b=1;b<element.size();b++){
+						
+						
+						String mess = element.get(b).text();
+						if(!(mess.equals(""))){
+							System.out.println(mess);	
+						}
+						
+					}
+			}
+					
+			} catch (IOException e) {
+				
+				e.printStackTrace();
+			}
+			return null;
+		}
+		
+}
+	
+

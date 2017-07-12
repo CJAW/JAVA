@@ -1,0 +1,18 @@
+package com.user.jsoup;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Data {
+	
+	 public static  ArrayList<String> leftList = new ArrayList<String>(); 
+	  public ArrayList<String> centertList=new ArrayList<String>();
+	  public ArrayList<String> rightList=new ArrayList<String>();
+
+	  public static void main(String[] args){
+		  
+		  System.out.println(leftList.get(1).toString());
+		  
+	  }
+}

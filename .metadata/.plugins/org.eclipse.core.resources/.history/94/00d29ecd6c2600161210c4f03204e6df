@@ -1,0 +1,18 @@
+package com.user.jsoup;
+
+
+import java.util.ArrayList;
+
+public class Test {
+	
+	
+    public static java.util.List<Data> lists = new ArrayList<Data>();
+    public static HtmlUtils htmlUtils = new HtmlUtils();
+	public static void main(String[] args){
+		
+		lists = htmlUtils.getAttendce();
+		System.out.println(lists.get(0).leftList.get(2));
+		
+	}
+
+}
